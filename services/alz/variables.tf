@@ -1,16 +1,60 @@
 # Common Variables
 # used for all capabilities deployment
 
+variable "root_parent_id" {
+  type        = string
+  description = "The root_parent_id is used to specify where to set the root for all Landing Zone deployments. Usually the Tenant ID when deploying the core Enterprise-scale Landing Zones."
+
+  validation {
+    condition     = can(regex("^[a-zA-Z0-9-_\\(\\)\\.]{1,36}$", var.root_parent_id))
+    error_message = "Value must be a valid Management Group ID, consisting of alphanumeric characters, hyphens, underscores, periods and parentheses."
+  }
+}
+
 variable "root_id" {
   type        = string
-  description = "Sets the value used for generating unique resource naming within the module."
-  default     = "myorg"
+  description = "If specified, will set a custom Name (ID) value for the Enterprise-scale \"root\" Management Group, and append this to the ID for all core Enterprise-scale Management Groups."
+  default     = "es"
+
+  validation {
+    condition     = can(regex("^[a-zA-Z0-9-]{2,10}$", var.root_id))
+    error_message = "Value must be between 2 to 10 characters long, consisting of alphanumeric characters and hyphens."
+  }
 }
 
 variable "root_name" {
   type        = string
-  description = "Sets the value used for the \"intermediate root\" management group display name."
-  default     = "My Organization"
+  description = "If specified, will set a custom Display Name value for the Enterprise-scale \"root\" Management Group."
+  default     = "Enterprise-Scale"
+
+  validation {
+    condition     = can(regex("^[A-Za-z][A-Za-z0-9- ._]{1,22}[A-Za-z0-9]?$", var.root_name))
+    error_message = "Value must be between 2 to 24 characters long, start with a letter, end with a letter or number, and can only contain space, hyphen, underscore or period characters."
+  }
+}
+
+variable "deploy_core_landing_zones" {
+  type        = bool
+  description = "If set to true, module will deploy the core Enterprise-scale Management Group hierarchy, including \"out of the box\" policies and roles."
+  default     = false
+}
+
+variable "deploy_management_resources" {
+  type        = bool
+  description = "If set to true, will enable the \"Management\" landing zone settings and add \"Management\" resources into the current Subscription context."
+  default     = false
+}
+
+variable "deploy_identity_resources" {
+  type        = bool
+  description = "If set to true, will enable the \"Identity\" landing zone settings."
+  default     = false
+}
+
+variable "deploy_connectivity_resources" {
+  type        = bool
+  description = "If set to true, will enable the \"Connectivity\" landing zone settings and add \"Connectivity\" resources into the current Subscription context."
+  default     = false
 }
 
 variable "primary_location" {
@@ -25,6 +69,12 @@ variable "secondary_location" {
   default     = ""
 }
 
+variable "default_tags" {
+  type        = map(string)
+  description = "If specified, will set the default tags for all resources deployed by this module where supported."
+  default     = {}
+}
+
 ###################################################################################################################################################################################################
 
 # Management Variables
@@ -33,6 +83,7 @@ variable "secondary_location" {
 variable "subscription_id_management" {
   type        = string
   description = "Subscription ID to use for \"management\" resources."
+  default = ""
 }
 
 variable "email_security_contact" {
@@ -156,6 +207,7 @@ variable "connectivity_resources_tags" {
 variable "subscription_id_connectivity" {
   type        = string
   description = "Subscription ID to use for \"connectivity\" resources."
+  default = ""
 }
 
 variable "configure_connectivity_resources" {
